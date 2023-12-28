@@ -7,7 +7,7 @@ from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 from typing import List
 
-nThreads = 4
+threads = [1, 2, 3, 4, 5, 6, 7, 8, 16, 32, 64, 128]
 
 def textFromFile(filename):
    with open(os.path.join(os.path.dirname(__file__), 'DATA/'+filename), 'r', encoding='utf-8') as file:
@@ -35,7 +35,7 @@ def get_ngrams_interval(text, n, i_from, i_to):
       ngrams[ngram] += 1
    return ngrams
 
-async def get_ngrams_parallel(text, n):
+async def get_ngrams_parallel(text, n, nThreads):
    with ProcessPoolExecutor() as process_pool:
       loop: AbstractEventLoop = asyncio.get_event_loop()
       chunks = [0] + [int(len(text)/nThreads) * i for i in range(1, nThreads)] + [len(text)]
@@ -64,18 +64,20 @@ async def main():
    bigrams = get_ngrams(text, 2)
    trigrams = get_ngrams(text, 3)
    end = time.time()
-   elapsed = end - start
-   print(f'seq NGrams (n={len(text)}): {elapsed*1000} ms')
+   seqElapsed = end - start
+   print(f'seq NGrams (n={len(text)}): {int(seqElapsed*1000)} ms')
    print('------------------')
 
    # PARALLEL
-   start = time.time()
-   bigrams = await get_ngrams_parallel(text, 2)
-   trigrams = await get_ngrams_parallel(text, 3)
-   end = time.time()
-   elapsed = end - start
-   print(f'par NGrams (n={len(text)}, nThreads={nThreads}): {elapsed*1000} ms')
-   print('------------------')
+   for nThreads in threads:
+      start = time.time()
+      bigrams = await get_ngrams_parallel(text, 2, nThreads)
+      trigrams = await get_ngrams_parallel(text, 3, nThreads)
+      end = time.time()
+      elapsed = end - start
+      print(f'par NGrams (n={len(text)}, nThreads={nThreads}): {int(elapsed*1000)} ms')
+      print(f'Speedup (nThreads={nThreads}): {round(seqElapsed/elapsed, 3)}x')
+      print('------------------')
 
 if __name__ == '__main__':
    asyncio.run(main())
