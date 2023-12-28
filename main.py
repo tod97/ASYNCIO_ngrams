@@ -7,7 +7,7 @@ from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 from typing import List
 
-threads = [1, 2, 3, 4, 5, 6, 7, 8, 16, 32, 64, 128]
+threads = [1, 2, 4, 6, 8, 16, 32]
 
 def textFromFile(filename):
    with open(os.path.join(os.path.dirname(__file__), 'DATA/'+filename), 'r', encoding='utf-8') as file:
@@ -57,27 +57,35 @@ async def get_ngrams_parallel(text, n, nThreads):
 
 async def main():
    text = textFromFile('mobydick.txt')
-   text = text + text + text + text
+   text = text + text + text
 
-   # SEQUENTIAL
-   start = time.time()
-   bigrams = get_ngrams(text, 2)
-   trigrams = get_ngrams(text, 3)
-   end = time.time()
-   seqElapsed = end - start
-   print(f'seq NGrams (n={len(text)}): {int(seqElapsed*1000)} ms')
-   print('------------------')
+   for i in range(3):
+      text = text + text
 
-   # PARALLEL
-   for nThreads in threads:
+      # SEQUENTIAL
       start = time.time()
-      bigrams = await get_ngrams_parallel(text, 2, nThreads)
-      trigrams = await get_ngrams_parallel(text, 3, nThreads)
+      bigrams = get_ngrams(text, 2)
+      trigrams = get_ngrams(text, 3)
       end = time.time()
-      elapsed = end - start
-      print(f'par NGrams (n={len(text)}, nThreads={nThreads}): {int(elapsed*1000)} ms')
-      print(f'Speedup (nThreads={nThreads}): {round(seqElapsed/elapsed, 3)}x')
+      seqElapsed = end - start
+      print(f'--------- SIZE = {len(text)} ---------')
+      print(f'seq NGrams: {int(seqElapsed*1000)} ms')
       print('------------------')
+
+      speedups = []
+      # PARALLEL
+      for nThreads in threads:
+         start = time.time()
+         bigrams = await get_ngrams_parallel(text, 2, nThreads)
+         trigrams = await get_ngrams_parallel(text, 3, nThreads)
+         end = time.time()
+         elapsed = end - start
+         print(f'par NGrams (t={nThreads}): {int(elapsed*1000)} ms')
+         print(f'Speedup: {round(seqElapsed/elapsed, 3)}x')
+         print('------------------')
+         speedups.append(round(seqElapsed/elapsed, 3))
+
+      print(f'Speedups: {speedups}, Size: {len(text)} chars ~ {len(text)/1000000} MB')
 
 if __name__ == '__main__':
    asyncio.run(main())
