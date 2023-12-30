@@ -14,6 +14,7 @@ for key, speedup, index in zip(speedups.keys(), speedups.values(), range(len(spe
     plt.plot(threads, speedup, label=key, color=colors[index])
 
 plt.title('Speedups')
+plt.gcf().canvas.set_window_title('speedups')
 plt.xlabel('Number of threads')
 plt.xticks(threads)
 plt.ylabel('speedup')
