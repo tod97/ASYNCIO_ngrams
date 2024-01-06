@@ -62,6 +62,8 @@ async def main():
 
    for i in range(6):
       text = text + text
+      size = "{0:.2f}".format(len(text)/1000000)
+      print(f'--------- SIZE = {size} MB ---------')
 
       # SEQUENTIAL
       start = time.time()
@@ -69,10 +71,9 @@ async def main():
       trigrams = get_ngrams(text, 3)
       end = time.time()
       seqElapsed = end - start
-      print(f'--------- SIZE = {len(text)} ---------')
       print(f'seq NGrams: {int(seqElapsed*1000)} ms')
-      print('------------------')
-      times['1 thread'] = times.get('1 thread', []) + [int(seqElapsed*1000)]
+      print('----------------------------------')
+      times[f'{size} MB'] = [int(seqElapsed*1000)]
 
       speedups = {}
       # PARALLEL
@@ -84,13 +85,13 @@ async def main():
          elapsed = end - start
          print(f'par NGrams (t={nThreads}): {int(elapsed*1000)} ms')
          print(f'Speedup: {round(seqElapsed/elapsed, 3)}x')
-         print('------------------')
-         times[f'{nThreads} threads'] = times.get(f'{nThreads} threads', []) + [int(elapsed*1000)]
-         speedups[f'{nThreads} threads'] = speedups.get(f'{nThreads} threads', []) + [round(seqElapsed/elapsed, 3)]
+         print('----------------------------------')
+         times[f'{size} MB'] = times.get(f'{size} MB') + [int(elapsed*1000)]
+         speedups[f'{size} MB'] = speedups.get(f'{size} MB', []) + [round(seqElapsed/elapsed, 3)]
 
-      print(f'Times: {times}')
-      print(f'Speedups: {speedups}')
-      print(f'Size: {len(text)} chars ~ {len(text)/1000000} MB')
+
+   print(f'Times: {times}')
+   print(f'Speedups: {speedups}')
 
 if __name__ == '__main__':
    asyncio.run(main())
