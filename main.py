@@ -7,7 +7,7 @@ from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 from typing import List
 
-threads = [1, 2, 4, 6, 8, 16, 32]
+threads = [2, 4, 6, 8, 16, 32]
 
 def textFromFile(filename):
    with open(os.path.join(os.path.dirname(__file__), 'DATA/'+filename), 'r', encoding='utf-8') as file:
@@ -56,10 +56,11 @@ async def get_ngrams_parallel(text, n, nThreads):
 
 
 async def main():
+   times = {}
    text = textFromFile('mobydick.txt')
    text = text + text + text
 
-   for i in range(3):
+   for i in range(6):
       text = text + text
 
       # SEQUENTIAL
@@ -71,8 +72,9 @@ async def main():
       print(f'--------- SIZE = {len(text)} ---------')
       print(f'seq NGrams: {int(seqElapsed*1000)} ms')
       print('------------------')
+      times['1 thread'] = times.get('1 thread', []) + [int(seqElapsed*1000)]
 
-      speedups = []
+      speedups = {}
       # PARALLEL
       for nThreads in threads:
          start = time.time()
@@ -83,9 +85,12 @@ async def main():
          print(f'par NGrams (t={nThreads}): {int(elapsed*1000)} ms')
          print(f'Speedup: {round(seqElapsed/elapsed, 3)}x')
          print('------------------')
-         speedups.append(round(seqElapsed/elapsed, 3))
+         times[f'{nThreads} threads'] = times.get(f'{nThreads} threads', []) + [int(elapsed*1000)]
+         speedups[f'{nThreads} threads'] = speedups.get(f'{nThreads} threads', []) + [round(seqElapsed/elapsed, 3)]
 
-      print(f'Speedups: {speedups}, Size: {len(text)} chars ~ {len(text)/1000000} MB')
+      print(f'Times: {times}')
+      print(f'Speedups: {speedups}')
+      print(f'Size: {len(text)} chars ~ {len(text)/1000000} MB')
 
 if __name__ == '__main__':
    asyncio.run(main())
