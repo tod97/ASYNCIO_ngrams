@@ -60,7 +60,7 @@ async def main():
    text = textFromFile('mobydick.txt')
    text = text + text + text
 
-   for i in range(6):
+   for i in range(8):
       text = text + text
       size = "{0:.2f}".format(len(text)/1000000)
       print(f'--------- SIZE = {size} MB ---------')
