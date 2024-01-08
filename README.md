@@ -1,6 +1,6 @@
 # Lab Parallel Computing
 
-This project aims to compare the performances of sequential and parallel n-gram counting algorithms using the asyncio concurrent library.
+This project aims to compare the performance of sequential and parallel n-gram counting algorithms using the asyncio concurrent library.
 
 ## Installation
 
