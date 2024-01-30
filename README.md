@@ -4,4 +4,4 @@ This project aims to compare the performance of sequential and parallel n-gram c
 
 ## Installation
 
-To be able to run this code, you need Python 3.4 and asyncio installed.
+To be able to run this code, you need Python ≥3.4 and asyncio installed.
